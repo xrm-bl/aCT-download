@@ -1,7 +1,7 @@
 # 自動CTデータ ダウンロードプログラム
 
 ## インストール方法
-- linkからzipファイルをダウンロードする．
+- [ここ](https://github.com/xrm-bl/aCT-download/archive/refs/heads/main.zip)からプログラムをダウンロードする．
 - zipファイルを展開して，`actinfo.py`と`actget.py`をわかりやすい場所に置く．
     - データセンターの場合は，OpenOndemandのFilesからホームディレクトリ(`/home/ユーザーID/`)にアップロードするのがわかりやすい．
 
