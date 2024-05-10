@@ -9,8 +9,8 @@
 ### 課題番号内のデータ一覧を表示する: actinfo.py
 - `python3 actinfo.py --user ユーザーID --proposal 課題番号`
 - パスワードを入力する．
-- サンプル番号と測定メタデータ一覧表が表示される．
-例
+- サンプル番号と測定メタデータ一覧表が表示される．　　　　
+- 例
 ```
 [j00XXXXX@fep4 ]$ python3 actinfo.py --user j00XXXXX --proposal 2024AXXXX
 
@@ -32,8 +32,8 @@ X data found
 - `python3 actget.py --user ユーザーID --proposal 課題番号 --sampleid サンプル番号 --zip ダウンロードするデータの種類(ro/ro_222/ro_444/rh/rh_222/rh_444)`
 - パスワードを入力する．
 - データセンターでは/UserData/ユーザーid配下，ローカルPCではカレントディレクトリに課題番号とサンプル番号のディレクトリが自動作成されて，zipファイルがダウンロードされる．
-- zipファイルはダウンロードされた後，自動的に展開される．zipファイルは削除される．
-例
+- zipファイルはダウンロードされた後，自動的に展開される．zipファイルは削除される．　　
+- 例
 ```
 [j00XXXXX@fep4 ]$ python3 actget.py --user j00XXXXX --proposal 2024AXXXX --sampleid XXXXXXXXX --zip ro_444
 
