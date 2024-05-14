@@ -1,6 +1,7 @@
 # 自動CTデータ ダウンロードプログラム
 
 ## インストール方法
+＊ご自身のPCで使う場合は，pythonのインストールが必要です．詳しくは[こちら](#pythonのインストール)
 - [ここ](https://github.com/xrm-bl/aCT-download/archive/refs/heads/main.zip)からプログラムをダウンロードする．
 - zipファイルを展開して，`actinfo.py`と`actget.py`をわかりやすい場所に置く．
     - データセンターの場合は，OpenOndemandのFilesからホームディレクトリ(`/home/ユーザーID/`)にアップロードするのがわかりやすい．
@@ -63,11 +64,17 @@ Extraction complete. (17 sec.)
 - `--zip all` `--zip allro` `--zip allrh` `--zip all222` `--zip all444`という指定も可能．
 - `--nounzip`をつけると，zipファイルのダウンロードのみで，展開を行わない．
 
-## トラブルシューティング
-- （ローカルPCで）以下のエラーが出て動かない場合→`pip install requests`でモジュールをインストールしてから実行する．
+## pythonのインストール
+- python 3.xとrequestsモジュールが必要です．
+- linuxでは
 ```
-Traceback (most recent call last):
-  File "C:\Users\ytake\Downloads\actinfo.py", line 1, in <module>
-    import os,sys,requests
-ModuleNotFoundError: No module named 'requests'
+sudo apt -y update
+sudo apt -y upgrade
+sudo apt install python3 python3-pip -y
+sudo pip3 install pip -U
+pip install requests
+```
+- windowsでは，https://www.python.jp/install/windows/install.html に従ってpythonをインストール後
+```
+pip install requests
 ```
