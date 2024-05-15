@@ -79,3 +79,4 @@ pip install requests
 ```
 pip install requests
 ```
+- MacOSでは，python3がプリインストールされているはずです．
