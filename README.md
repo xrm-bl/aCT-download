@@ -78,4 +78,7 @@ pip install requests
 ```
 pip install requests
 ```
-- MacOSでは，python3がプリインストールされているはずです．
+- MacOSでは，python3がプリインストールされているはずですので，requestsモジュールをインストールします．
+```
+pip3 install requests
+```
