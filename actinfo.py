@@ -195,20 +195,23 @@ def main():
                     HEADERdata = HEADERdata.decode('utf8')
                     HEADERdata = HEADERdata.splitlines()
                     HEADERdata = HEADERdata[2].split('|')
-
-                    #if args.samplename == None and args.pixelsize == None and args.exposure == None and args.projections == None and args.xray == None:
-                    if all(x is None for x in keys) is True:
-                        header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
-                        num = num + 1
-                    else:
-                        #if HEADERdata[3] == args.samplename or float(HEADERdata[4].split()[0]) == args.pixelsize or float(HEADERdata[5].split()[0]) == args.exposure or int(HEADERdata[6]) == args.projections or float(HEADERdata[7].split()[0]) == args.xray:
-                        if keys[1] is None or keys[1] == HEADERdata[3]:
-                            if keys[2] is None or keys[2] == float(HEADERdata[4].split()[0]):
-                                if keys[3] is None or keys[3] == float(HEADERdata[5].split()[0]):
-                                    if keys[4] is None or keys[4] == int(HEADERdata[6]):
-                                        if keys[5] is None or keys[5] == float(HEADERdata[7].split()[0]):
-                                            header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
-                                            num = num + 1 
+                    
+                    if len(HEADERdata) == 9:
+                        #if args.samplename == None and args.pixelsize == None and args.exposure == None and args.projections == None and args.xray == None:
+                        if all(x is None for x in keys) is True:
+                            header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                            num = num + 1
+                        else:
+                            #if HEADERdata[3] == args.samplename or float(HEADERdata[4].split()[0]) == args.pixelsize or float(HEADERdata[5].split()[0]) == args.exposure or int(HEADERdata[6]) == args.projections or float(HEADERdata[7].split()[0]) == args.xray:
+                            if keys[1] is None or keys[1] == HEADERdata[3]:
+                                if keys[2] is None or keys[2] == float(HEADERdata[4].split()[0]):
+                                    if keys[3] is None or keys[3] == float(HEADERdata[5].split()[0]):
+                                        if keys[4] is None or keys[4] == int(HEADERdata[6]):
+                                            if keys[5] is None or keys[5] == float(HEADERdata[7].split()[0]):
+                                                header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                                                num = num + 1 
+                                            else:
+                                                pass
                                         else:
                                             pass
                                     else:
@@ -217,18 +220,17 @@ def main():
                                     pass
                             else:
                                 pass
-                        else:
-                            pass
-                else:
-                    pass
+                    else:
+                        pass
         else:
             HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(args.sampleid) +  "/HEADER.md"
             HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw)).content
             HEADERdata = HEADERdata.decode('utf8')
             HEADERdata = HEADERdata.splitlines()
             HEADERdata = HEADERdata[2].split('|') 
-            header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
-            num = num + 1           
+            if len(HEADERdata) == 9:
+                header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                num = num + 1           
 
         if num != 0:
             print(f"{num} data found")
