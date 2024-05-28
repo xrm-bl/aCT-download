@@ -1,0 +1,20 @@
+exe 作った手順
+
+  python が入っている windows で powershell を立ち上げる
+  pip install pipenv
+
+  actinfo.py と actget.py があるところに移動
+  cd ほにゃらら
+
+  pipenv --python 3.11   ← バージョンはそれぞれ
+  pipenv shell
+
+  pipenv install requests
+  pip install pyinstaller
+  pyinstaller actget.py --onefile --clean
+  pyinstaller actinfo.py --onefile --clean
+
+  dist の中にそれぞれ出来上がる。
+
+
+
