@@ -71,12 +71,12 @@ def main():
                 num = num + 1
 
         if num != 0:
-            print(f"{num} data found")
-            print("\n")
+            #print(f"{num} data found")
+            #print("\n")
             return sample_id_list
         else:
-            print("no data found")
-            print("\n")
+            #print("no data found")
+            #print("\n")
             sys.exit()
         
     
@@ -143,12 +143,46 @@ def main():
         proposal_response = urlcheck(url, "--user or Password or --proposal")
         sample_id_list = get_sample_id(proposal_response)
     else: 
-        sample_id_list = args.sampleid
+        sample_id_list = []# args.sampleid
         url = str(source) + str(args.user) + "/" + str(args.proposal)  
         urlcheck(url, "--user or Password or --proposal")
-        for sampleid in sample_id_list:    
-            url = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(sampleid)
-            urlcheck(url, "--sampleid")
+
+        def wildcardcheck(id_list):
+            for elem in id_list:
+                if '*' in str(elem):
+                    return True
+            return False
+
+        result = wildcardcheck(args.sampleid)
+
+        if result is True:
+            proposal_response = urlcheck(url, "--user or Password or --proposal")
+            sample_id_list_temp = get_sample_id(proposal_response)   
+
+            for elem in args.sampleid:
+                if "*" in elem:
+                    key = elem.strip('*')
+                    for sample_id in sample_id_list_temp:
+                        if sample_id.startswith(key):
+                            sample_id_list.append(sample_id)
+                        else:
+                            pass
+                else:    
+                    url = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(elem)
+                    urlcheck(url, "--sampleid")
+                    sample_id_list.append(elem)
+        
+        else:
+            sample_id_list = args.sampleid
+            for sampleid in sample_id_list:    
+                url = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(sampleid)
+                urlcheck(url, "--sampleid")
+
+    sample_id_list = list(dict.fromkeys(sample_id_list))
+
+    print(f"{len(sample_id_list)} data found")
+    print("\n")
+    print(sample_id_list)
 
     ## 保存先の整合性確認
     if args.output == None:
