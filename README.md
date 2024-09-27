@@ -103,3 +103,4 @@ pip3 install requests
 - 2024/5/23 actinfo.py: 転送途中のサンプル番号がある場合の読み取りエラーを回避．
 - 2024/5/27 windows 用に exe 化したものをアップロード(上杉)
 - 2024/5/30 actget.py & actget.exe: sammpleid指定時にワイルドカードを利用可能とした．
+- 2024/9/27 actquick.py & actquick.exeを追加．
