@@ -1,5 +1,4 @@
 import os,sys,requests
-from requests.exceptions import RequestException, ConnectionError, HTTPError, Timeout
 from xml.etree import ElementTree as ET
 import argparse
 import getpass
@@ -154,8 +153,7 @@ def main():
     parser.add_argument('--exposure', type=float, default=None, help='Exposure (without unit, optional)')
     parser.add_argument('--projections', type=int, default=None, help='Number of projections (optional)')
     parser.add_argument('--xray', type=float, default=None, help='X-Ray Energy (without unit, optional)')
-    ##temporary## parser.add_argument('--csv', action='store_true', default=False, help='output csv file (optional)')
-    parser.add_argument('--txt', action='store_true', default=False, help='output text file (optional)')
+    parser.add_argument('--csv', action='store_true', default=False, help='output csv file (optional)')
     args = parser.parse_args()
 
     print("\n")
@@ -182,8 +180,7 @@ def main():
         namespaces = {'d': 'DAV:'}  # Adjust the namespace if necessary
         print("\n")
         print(f"{args.proposal} Searching...")
-        ##temporary## header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray"]]
-        header = [["Sample ID, Sample Name, Pixel Size, Exposure, Projections, X-ray"]] ##temporary##
+        header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray"]]
         # Find all 'href' elements - they contain the directory names
         num = 0
 
@@ -194,39 +191,11 @@ def main():
                 dirname = os.path.basename(os.path.dirname(href.text))
                 if dirname != args.proposal:
                     HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(dirname) +  "/HEADER.md"
-                    try:
-                        HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw), timeout=5.0).content
-                        response.raise_for_status()
-                    except ConnectionError as ce:
-                        HEADERdata = [f"{args.proposal} {dirname} Connection Error: {ce}"]
-                    except HTTPError as he:
-                        HEADERdata = [f"{args.proposal} {dirname} HTTP Error: {he}"]
-                    except Timeout as te:
-                        HEADERdata = [f"{args.proposal} {dirname} Timeout Error: {te}"]
-                    except RequestException as re:
-                        HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
-
-                    #print(HEADERdata)
-
-                    try:
-                        HEADERdata = HEADERdata.decode('utf8')
-                    except AttributeError:
-                        pass
+                    HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw)).content
+                    HEADERdata = HEADERdata.decode('utf8')
+                    HEADERdata = HEADERdata.splitlines()
+                    HEADERdata = HEADERdata[2].split('|')
                     
-                    try:
-                        HEADERdata = HEADERdata.splitlines()
-                    except AttributeError:
-                        pass
-                    
-                    if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                        HEADERdata = [f"{args.proposal} {dirname} Empty HEADER.md"]
-                    elif len(HEADERdata) != 1:
-                        ##temporary## HEADERdata = HEADERdata[2].split('|') 
-                        HEADERdata = [HEADERdata[2]] ##temporary##
-                    else:
-                        pass
-                    print(HEADERdata[0])
-
                     if len(HEADERdata) == 9:
                         #if args.samplename == None and args.pixelsize == None and args.exposure == None and args.projections == None and args.xray == None:
                         if all(x is None for x in keys) is True:
@@ -252,53 +221,23 @@ def main():
                             else:
                                 pass
                     else:
-                        ##temporary## pass
-                        header.append(HEADERdata) ##temporary##   
-                        num = num + 1 ##temporary## 
+                        pass
         else:
             HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(args.sampleid) +  "/HEADER.md"
-            try:
-                HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw), timeout=5.0).content
-                response.raise_for_status()
-            except ConnectionError as ce:
-                HEADERdata = [f"{args.proposal} {dirname} Connection Error: {ce}"]
-            except HTTPError as he:
-                HEADERdata = [f"{args.proposal} {dirname} HTTP Error: {he}"]
-            except Timeout as te:
-                HEADERdata = [f"{args.proposal} {dirname} Timeout Error: {te}"]
-            except RequestException as re:
-                HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
-
-            #print(HEADERdata)
-
-            try:
-                HEADERdata = HEADERdata.decode('utf8')
-            except AttributeError:
-                pass
-            
-            try:
-                HEADERdata = HEADERdata.splitlines()
-            except AttributeError:
-                pass
-            
-            if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                HEADERdata = [f"{args.proposal} {dirname} Empty HEADER.md"]
-            elif len(HEADERdata) != 1:
-                ##temporary## HEADERdata = HEADERdata[2].split('|') 
-                HEADERdata = [HEADERdata[2]] ##temporary##
-            else:
-                pass
-
-            print(HEADERdata[0]) 
+            HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw)).content
+            HEADERdata = HEADERdata.decode('utf8')
+            HEADERdata = HEADERdata.splitlines()
+            HEADERdata = HEADERdata[2].split('|') 
+            if len(HEADERdata) == 9:
+                header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                num = num + 1           
 
         if num != 0:
             print(f"{num} data found")
-            ##temporary## printTable(header, useFieldNames=True)
+            printTable(header, useFieldNames=True)
             print("\n")
-            ##temporary## if args.csv == True:
-            if args.txt == True: ##temporary##    
-                ##temporary## csvpath = f'{args.proposal}.csv'
-                csvpath = f'{args.proposal}.txt'
+            if args.csv == True:
+                csvpath = f'{args.proposal}.csv'
                 # Writing to a CSV file
                 with open(csvpath, 'w', newline='') as file:
                     writer = csv.writer(file)
