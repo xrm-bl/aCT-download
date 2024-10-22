@@ -104,3 +104,5 @@ pip3 install requests
 - 2024/5/27 windows 用に exe 化したものをアップロード(上杉)
 - 2024/5/30 actget.py & actget.exe: sammpleid指定時にワイルドカードを利用可能とした．
 - 2024/9/27 actquick.py & actquick.exeを追加．
+- 2024/10/17 サーバー不具合に伴い，actinfoをセーフモード仕様に変更．
+- 2024/10/22 actquick, actget: ダウンロードエラー時は止まらずに次のデータにスキップするように修正．
