@@ -110,9 +110,11 @@ def main():
             filesize = round(total_size / 1024 ** 2, 2)
             speed = round(filesize / elapsed)
             print(f"zip downloaded successfully!: {outputzip} ({round(elapsed)} sec. elapsed, speed = {speed} MB/sec)")
+            return response.status_code
         else:
             print(f"Failed to download file. Status code: {response.status_code}")
             print("\n")
+            return response.status_code
 
     def print_progress_bar(percent_complete):
         bar_length = 50
@@ -214,9 +216,9 @@ def main():
     ## リストを順番にダウンロード(,展開,zip削除)
     for data in inoutlist:
         os.makedirs(os.path.dirname(data[3]), exist_ok=True)
-        downloadzip(data[0],data[1],data[2],data[3])
+        responsecode = downloadzip(data[0],data[1],data[2],data[3])
         
-        if args.nounzip == False:
+        if args.nounzip == False and responsecode == 200:
             start = time()
             zipdir = os.path.dirname(data[3])
             os.makedirs(zipdir, exist_ok=True)
