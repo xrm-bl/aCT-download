@@ -155,7 +155,7 @@ def main():
     parser.add_argument('--projections', type=int, default=None, help='Number of projections (optional)')
     parser.add_argument('--xray', type=float, default=None, help='X-Ray Energy (without unit, optional)')
     ##temporary## parser.add_argument('--csv', action='store_true', default=False, help='output csv file (optional)')
-    parser.add_argument('--txt', action='store_true', default=False, help='output text file (optional)')
+    parser.add_argument('--csv', action='store_true', default=False, help='output csv file (optional)')
     args = parser.parse_args()
 
     print("\n")
@@ -182,8 +182,8 @@ def main():
         namespaces = {'d': 'DAV:'}  # Adjust the namespace if necessary
         print("\n")
         print(f"{args.proposal} Searching...")
-        ##temporary## header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray"]]
-        header = [["Sample ID, Sample Name, Pixel Size, Exposure, Projections, X-ray"]] ##temporary##
+        header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray"]]
+        #header = [["Sample ID, Sample Name, Pixel Size, Exposure, Projections, X-ray"]] ##temporary##
         # Find all 'href' elements - they contain the directory names
         num = 0
 
@@ -219,28 +219,31 @@ def main():
                         pass
                     
                     if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                        HEADERdata = [f"{args.proposal} {dirname} Empty HEADER.md"]
+                        HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
                     elif len(HEADERdata) != 1:
-                        ##temporary## HEADERdata = HEADERdata[2].split('|') 
-                        HEADERdata = [HEADERdata[2]] ##temporary##
+                        HEADERdata = HEADERdata[2].split(',')
+                        for i in range(len(HEADERdata)):
+                            HEADERdata[i] = HEADERdata[i].lstrip()
                     else:
-                        pass
-                    print(HEADERdata[0])
-
-                    if len(HEADERdata) == 9:
+                        HEADERdata = ["Error","Error","Error","Error","Error","Error","Error"] 
+                        
+                    
+                    if len(HEADERdata) == 7:
                         #if args.samplename == None and args.pixelsize == None and args.exposure == None and args.projections == None and args.xray == None:
                         if all(x is None for x in keys) is True:
-                            header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                            header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
                             num = num + 1
+                            print("\r"+str(num) + " data found",end="")
                         else:
                             #if HEADERdata[3] == args.samplename or float(HEADERdata[4].split()[0]) == args.pixelsize or float(HEADERdata[5].split()[0]) == args.exposure or int(HEADERdata[6]) == args.projections or float(HEADERdata[7].split()[0]) == args.xray:
-                            if keys[1] is None or keys[1] == HEADERdata[3]:
-                                if keys[2] is None or keys[2] == float(HEADERdata[4].split()[0]):
-                                    if keys[3] is None or keys[3] == float(HEADERdata[5].split()[0]):
-                                        if keys[4] is None or keys[4] == int(HEADERdata[6]):
-                                            if keys[5] is None or keys[5] == float(HEADERdata[7].split()[0]):
-                                                header.append([HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],HEADERdata[7]])
+                            if keys[1] is None or keys[1] == HEADERdata[2]:
+                                if keys[2] is None or keys[2] == float(HEADERdata[3].split()[0]):
+                                    if keys[3] is None or keys[3] == float(HEADERdata[4].split()[0]):
+                                        if keys[4] is None or keys[4] == int(HEADERdata[5]):
+                                            if keys[5] is None or keys[5] == float(HEADERdata[6].split()[0]):
+                                                header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
                                                 num = num + 1 
+                                                print("\r"+str(num) + " data found",end="")
                                             else:
                                                 pass
                                         else:
@@ -252,9 +255,9 @@ def main():
                             else:
                                 pass
                     else:
-                        ##temporary## pass
-                        header.append(HEADERdata) ##temporary##   
-                        num = num + 1 ##temporary## 
+                        HEADERdata = ["Search Error","Search Error","Search Error","Search Error","Search Error","Search Error","Search Error"] 
+                        header.append(HEADERdata)  
+                        num = num + 1  
         else:
             HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(args.sampleid) +  "/HEADER.md"
             try:
@@ -269,8 +272,6 @@ def main():
             except RequestException as re:
                 HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
 
-            #print(HEADERdata)
-
             try:
                 HEADERdata = HEADERdata.decode('utf8')
             except AttributeError:
@@ -280,25 +281,25 @@ def main():
                 HEADERdata = HEADERdata.splitlines()
             except AttributeError:
                 pass
-            
             if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                HEADERdata = [f"{args.proposal} {dirname} Empty HEADER.md"]
+                HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
             elif len(HEADERdata) != 1:
-                ##temporary## HEADERdata = HEADERdata[2].split('|') 
-                HEADERdata = [HEADERdata[2]] ##temporary##
+                HEADERdata = HEADERdata[2].split(',')
+                for i in range(len(HEADERdata)):
+                    HEADERdata[i] = HEADERdata[i].lstrip()
+                header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
             else:
-                pass
+                HEADERdata = ["Error","Error","Error","Error","Error","Error","Error"] 
 
-            print(HEADERdata[0]) 
+            num = 1
 
         if num != 0:
-            print(f"{num} data found")
-            ##temporary## printTable(header, useFieldNames=True)
             print("\n")
-            ##temporary## if args.csv == True:
-            if args.txt == True: ##temporary##    
-                ##temporary## csvpath = f'{args.proposal}.csv'
-                csvpath = f'{args.proposal}.txt'
+            printTable(header, useFieldNames=True)
+            #print(header)
+            print("\n")
+            if args.csv == True:
+                csvpath = f'{args.proposal}.csv'
                 # Writing to a CSV file
                 with open(csvpath, 'w', newline='') as file:
                     writer = csv.writer(file)
