@@ -106,3 +106,4 @@ pip3 install requests
 - 2024/9/27 actquick.py & actquick.exeを追加．
 - 2024/10/17 サーバー不具合に伴い，actinfoをセーフモード仕様に変更．
 - 2024/10/22 actquick, actget: ダウンロードエラー時は止まらずに次のデータにスキップするように修正．
+- 2024/11/6 actinfo: Nextcloudの仕様変更に伴い修正．
