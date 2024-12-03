@@ -195,7 +195,7 @@ def main():
         outputpath = args.output
 
     os.makedirs(os.path.dirname(outputpath), exist_ok=True)
-    print(f"\nZip will be donwloaded to {outputpath}")
+    print(f"\nZip will be downloaded to {outputpath}")
 
     ## 入出力リスト作成
     inoutlist = []
