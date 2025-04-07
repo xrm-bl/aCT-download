@@ -8,6 +8,7 @@ import csv
 # Replace 'url' with your WebDAV server URL
 source = 'https://dc-act.spring8.or.jp/remote.php/dav/files/'
 
+
 # initColors, findLargestElement, createMatrix, makeRows, createWrappingRows, createRowUnderFields, printRowsInTable, printTable are from:
 # https://github.com/SuperMaZingCoder/TableIt
 # Copyright 2021 SuperMaZingCoder
@@ -193,19 +194,37 @@ def main():
             for href in tree.findall('.//d:href', namespaces):
                 dirname = os.path.basename(os.path.dirname(href.text))
                 if dirname != args.proposal:
-                    HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(dirname) +  "/HEADER.md"
-                    try:
-                        HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw), timeout=5.0).content
-                        response.raise_for_status()
-                    except ConnectionError as ce:
-                        HEADERdata = [f"{args.proposal} {dirname} Connection Error: {ce}"]
-                    except HTTPError as he:
-                        HEADERdata = [f"{args.proposal} {dirname} HTTP Error: {he}"]
-                    except Timeout as te:
-                        HEADERdata = [f"{args.proposal} {dirname} Timeout Error: {te}"]
-                    except RequestException as re:
-                        HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
-
+                    HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(dirname) +  "/README.md"
+                    
+                    response = requests.head(HEADERurl,auth=(args.user, args.pw), timeout=5.0)
+                    if response.status_code == 200:
+                        try:
+                            HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw), timeout=5.0).content
+                            response.raise_for_status()
+                        except ConnectionError as ce:
+                            HEADERdata = [f"{args.proposal} {dirname} Connection Error: {ce}"]
+                        except HTTPError as he:
+                            HEADERdata = [f"{args.proposal} {dirname} HTTP Error: {he}"]
+                        except Timeout as te:
+                            HEADERdata = [f"{args.proposal} {dirname} Timeout Error: {te}"]
+                        except RequestException as re:
+                            HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
+                    
+                    elif response.status_code == 404:
+                        HEADERurl = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(dirname) +  "/HEADER.md"
+                        response = requests.head(HEADERurl,auth=(args.user, args.pw), timeout=5.0)
+                        try:
+                            HEADERdata = requests.get(HEADERurl, auth=(args.user, args.pw), timeout=5.0).content
+                            response.raise_for_status()
+                        except ConnectionError as ce:
+                            HEADERdata = [f"{args.proposal} {dirname} Connection Error: {ce}"]
+                        except HTTPError as he:
+                            HEADERdata = [f"{args.proposal} {dirname} HTTP Error: {he}"]
+                        except Timeout as te:
+                            HEADERdata = [f"{args.proposal} {dirname} Timeout Error: {te}"]
+                        except RequestException as re:
+                            HEADERdata = [f"{args.proposal} {dirname} Error: {re}"]
+                    
                     #print(HEADERdata)
 
                     try:
