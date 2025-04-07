@@ -9,6 +9,7 @@ from time import time
 # Replace 'url' with your WebDAV server URL
 source = 'https://dc-act.spring8.or.jp/remote.php/dav/files/'
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--user', type=str, default=None, help='userID for aCT download website',required=True) 
@@ -215,51 +216,96 @@ def main():
     ## リストを順番にダウンロード(,展開,zip削除)
     for data in inoutlist:
         os.makedirs(os.path.dirname(data[3]), exist_ok=True)
-        response = downloadzip(data[0],data[1],data[2],data[3])
+
+        # print(data[0]) #2024B2426
+        # print(data[1]) # 1739549061
+        # print(data[2]) # https://dc-act.spring8.or.jp/remote.php/dav/files/j0038986/2024B2426/1739549061/rh.zip
+        # print(data[3]) # C:\tools\aCT-download/2024B2426/1739549061/rh.zip
+        # print(data[4]) # rh
+
+        # ro,rhの場合
+        # ro.zip/rh.zip か ro-1~4.zip/rh-1~4.zip　か確認
+        if data[4] == "ro" or data[4] == "rh":
+            response = requests.head(data[2],auth=(args.user, args.pw), timeout=5.0)
+            # ro.zip/rh.zipの場合
+            if response.status_code == 200:
+                response = downloadzip(data[0],data[1],data[2],data[3])
+                
+                ## 二段階の展開
+                if args.nounzip == False and response == 200:
+                    start = time()
+                    zipdir = os.path.dirname(data[3])
+                    os.makedirs(zipdir, exist_ok=True)
+                    extract_zip(data[3], zipdir)
+                    os.remove(data[3])
+                    print(f"\nExtracting {data[4]}-1,-2,-3,-4.zip in parallel (takes some time)")
+                    zipdir = os.path.dirname(data[3]) + "/" + data[4]
+
+                    def rorhzip(path):
+                        with zipfile.ZipFile(path) as zf:
+                            zf.extractall(zipdir)
+                        os.remove(path)
+                    ziplist = [zipdir+ "-" + str(i) + ".zip" for i in range(1,5)]
+                    os.makedirs(zipdir, exist_ok=True)
+                    with ThreadPoolExecutor(max_workers=4) as executor:
+                        executor.map(rorhzip,ziplist)
+
+                    # マルチスレッド（４並列）での展開が失敗する場合は逐次処理                
+                    # extract_zip(zipdir + "-1.zip", zipdir)
+                    # print(f"\n{data[4]}-1.zip extracted") 
+                    # os.remove(zipdir+ "-1.zip")
+                    # extract_zip(zipdir + "-2.zip", zipdir)
+                    # print(f"\n{data[4]}-2.zip extracted")
+                    # os.remove(zipdir+ "-2.zip") 
+                    # extract_zip(zipdir + "-3.zip", zipdir)
+                    # print(f"\n{data[4]}-3.zip extracted") 
+                    # os.remove(zipdir+ "-3.zip")
+                    # extract_zip(zipdir + "-4.zip", zipdir)
+                    # print(f"\n{data[4]}-4.zip extracted") 
+                    # os.remove(zipdir+ "-4.zip")
+
+                    elapsed = round(time() - start)
+                    print(f"Extraction complete. ({elapsed} sec.)")   
+                    print("\n")
+            
+            # ro-1~4.zip/rh-1~4.zipの場合
+            elif response.status_code == 404:
+                # 1,2,3,4を順番にダウンロード
+                for i in range(1,5):
+                    data[2] = str(source) + str(args.user) + "/" + str(data[0]) + "/" + str(data[1]) + "/" + str(data[4]) + "-" + str(i) + ".zip"
+                    data[3] = outputpath + "/" + str(args.proposal) + "/" + str(data[1]) + "/" + str(data[4]) + "-" + str(i) + ".zip"
+                    response = downloadzip(data[0],data[1],data[2],data[3])
+
+                    # 展開        
+                    if args.nounzip == False and response == 200:
+                        start = time()
+                        zipdir = os.path.dirname(data[3])
+                        os.makedirs(zipdir, exist_ok=True)
+                        extract_zip(data[3], zipdir)
+                        os.remove(data[3])
+                
+                        elapsed = round(time() - start)
+                        print(f"Extraction complete. ({elapsed} sec.)")   
+                        print("\n")
         
-        if args.nounzip == False and response == 200:
-            start = time()
-            zipdir = os.path.dirname(data[3])
-            os.makedirs(zipdir, exist_ok=True)
-            extract_zip(data[3], zipdir)
-            os.remove(data[3])
-            if data[4] == "ro" or data[4] == "rh": ## roとrhは二段階の展開
-                print(f"\nExtracting {data[4]}-1,-2,-3,-4.zip in parallel (takes some time)")
-                zipdir = os.path.dirname(data[3]) + "/" + data[4]
-
-                def rorhzip(path):
-                    with zipfile.ZipFile(path) as zf:
-                        zf.extractall(zipdir)
-                    os.remove(path)
-                ziplist = [zipdir+ "-" + str(i) + ".zip" for i in range(1,5)]
+        # ro,rh以外
+        else:
+            os.makedirs(os.path.dirname(data[3]), exist_ok=True)
+            response = downloadzip(data[0],data[1],data[2],data[3])
+      
+            # 展開
+            if args.nounzip == False and response == 200:
+                start = time()
+                zipdir = os.path.dirname(data[3])
                 os.makedirs(zipdir, exist_ok=True)
-                with ThreadPoolExecutor(max_workers=4) as executor:
-                    executor.map(rorhzip,ziplist)
+                extract_zip(data[3], zipdir)
+                os.remove(data[3])
 
-                # マルチスレッド（４並列）での展開が失敗する場合は逐次処理                
-                # extract_zip(zipdir + "-1.zip", zipdir)
-                # print(f"\n{data[4]}-1.zip extracted") 
-                # os.remove(zipdir+ "-1.zip")
-                # extract_zip(zipdir + "-2.zip", zipdir)
-                # print(f"\n{data[4]}-2.zip extracted")
-                # os.remove(zipdir+ "-2.zip") 
-                # extract_zip(zipdir + "-3.zip", zipdir)
-                # print(f"\n{data[4]}-3.zip extracted") 
-                # os.remove(zipdir+ "-3.zip")
-                # extract_zip(zipdir + "-4.zip", zipdir)
-                # print(f"\n{data[4]}-4.zip extracted") 
-                # os.remove(zipdir+ "-4.zip")
-
-                elapsed = round(time() - start)
-                print(f"Extraction complete. ({elapsed} sec.)")   
-                print("\n")
-
-            else:
                 elapsed = round(time() - start)
                 print(f"\nExtraction complete. ({elapsed} sec.)")  
                 print("\n")  
-        else:
-            pass
+            else:
+                pass
     
 if __name__ == '__main__':
     main()
