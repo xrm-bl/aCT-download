@@ -107,3 +107,4 @@ pip3 install requests
 - 2024/10/17 サーバー不具合に伴い，actinfoをセーフモード仕様に変更．
 - 2024/10/22 actquick, actget: ダウンロードエラー時は止まらずに次のデータにスキップするように修正．
 - 2024/11/6 actinfo: Nextcloudの仕様変更に伴い修正．
+- 2025/4/7 actinfo, actget: Nextcloudの仕様変更に伴い修正．(メタデータ情報の読みとりおよびro,rh zipファイルのダウンロード形式)
