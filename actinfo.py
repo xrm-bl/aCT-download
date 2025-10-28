@@ -183,7 +183,7 @@ def main():
         namespaces = {'d': 'DAV:'}  # Adjust the namespace if necessary
         print("\n")
         print(f"{args.proposal} Searching...")
-        header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray"]]
+        header = [["Sample ID", "Sample Name", "Pixel Size", "Exposure", "Projections", "X-ray", "Size (GB)"]]
         #header = [["Sample ID, Sample Name, Pixel Size, Exposure, Projections, X-ray"]] ##temporary##
         # Find all 'href' elements - they contain the directory names
         num = 0
@@ -238,19 +238,58 @@ def main():
                         pass
                     
                     if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                        HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
+                        HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
                     elif len(HEADERdata) != 1:
                         HEADERdata = HEADERdata[2].split(',')
                         for i in range(len(HEADERdata)):
                             HEADERdata[i] = HEADERdata[i].lstrip()
                     else:
-                        HEADERdata = ["Error","Error","Error","Error","Error","Error","Error"] 
+                        HEADERdata = ["Error","Error","Error","Error","Error","Error","Error","Error"] 
+
+
+
+
+
+                    # PROPFINDリクエスト（深さ1: 直下のファイルとフォルダ情報）
+                    headerssize = {
+                        "Depth": "1",
+                        "Content-Type": "application/xml"
+                    }
+                    bodysize = """<?xml version="1.0"?>
+                    <d:propfind xmlns:d="DAV:">
+                    <d:prop>
+                        <d:getcontentlength/>
+                    </d:prop>
+                    </d:propfind>
+                    """
+                    urlsize = str(source) + str(args.user) + "/" + str(args.proposal) + "/" + str(dirname)
+                    
+                    # リクエスト送信
+                    response = requests.request("PROPFIND", urlsize, data=bodysize, headers=headerssize, auth=(args.user, args.pw), timeout=5.0)
+
+                    if response.status_code not in (207, 200):
+                        print("Error:", response.status_code, response.text)
+                    else:
+                        total_size = 0
+                        ns = {'d': 'DAV:'}
+                        root = ET.fromstring(response.text)
+
+                        for resp in root.findall('d:response', ns):
+                            length_elem = resp.find('.//d:getcontentlength', ns)
+                            if length_elem is not None and length_elem.text:
+                                total_size += int(length_elem.text)
+
+                        total_size = round(total_size / 1024 / 1024 / 1024)
+
+
+
+
                         
                     
                     if len(HEADERdata) == 7:
                         #if args.samplename == None and args.pixelsize == None and args.exposure == None and args.projections == None and args.xray == None:
                         if all(x is None for x in keys) is True:
-                            header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
+                            header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],total_size])
                             num = num + 1
                             print("\r"+str(num) + " data found",end="")
                         else:
@@ -260,7 +299,7 @@ def main():
                                     if keys[3] is None or keys[3] == float(HEADERdata[4].split()[0]):
                                         if keys[4] is None or keys[4] == int(HEADERdata[5]):
                                             if keys[5] is None or keys[5] == float(HEADERdata[6].split()[0]):
-                                                header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
+                                                header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6],total_size])
                                                 num = num + 1 
                                                 print("\r"+str(num) + " data found",end="")
                                             else:
@@ -274,7 +313,7 @@ def main():
                             else:
                                 pass
                     else:
-                        HEADERdata = ["Search Error","Search Error","Search Error","Search Error","Search Error","Search Error","Search Error"] 
+                        HEADERdata = ["Search Error","Search Error","Search Error","Search Error","Search Error","Search Error","Search Error","Search Error"] 
                         header.append(HEADERdata)  
                         num = num + 1  
         else:
@@ -301,14 +340,14 @@ def main():
             except AttributeError:
                 pass
             if HEADERdata == ['This is the WebDAV interface. It can only be accessed by WebDAV clients such as the Nextcloud desktop sync client.']:
-                HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
+                HEADERdata = ["Empty","Empty","Empty","Empty","Empty","Empty","Empty","Empty"]
             elif len(HEADERdata) != 1:
                 HEADERdata = HEADERdata[2].split(',')
                 for i in range(len(HEADERdata)):
                     HEADERdata[i] = HEADERdata[i].lstrip()
                 header.append([HEADERdata[1],HEADERdata[2],HEADERdata[3],HEADERdata[4],HEADERdata[5],HEADERdata[6]])
             else:
-                HEADERdata = ["Error","Error","Error","Error","Error","Error","Error"] 
+                HEADERdata = ["Error","Error","Error","Error","Error","Error","Error","Error"] 
 
             num = 1
 
